@@ -8,7 +8,7 @@ CODE=f"{secrets.randbelow(1000000):06d}"
 kb=Controller()
 held=set()
 KEYS={"W":"w","A":"a","S":"s","D":"d","CTRL":Key.ctrl,"SHIFT":Key.shift,
-"SPACE":Key.space,"ENTER":Key.enter,"ESC":Key.esc,"F":"f","C":"c","H":"h",
+"SPACE":Key.space,"ENTER":Key.enter,"ESC":Key.esc,"TAB":Key.tab,"F":"f","C":"c","H":"h",
 "V":"v","R":"r","E":"e","Q":"q","HOME":Key.home,"INSERT":Key.insert,
 "DELETE":Key.delete,"PAGEUP":Key.page_up,"PAGEDOWN":Key.page_down,
 "UP":Key.up,"DOWN":Key.down,"LEFT":Key.left,"RIGHT":Key.right}
