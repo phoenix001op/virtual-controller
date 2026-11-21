@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0b0f1a">
+<title>Vice City Controller</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="/static/mobile.css">
+</head>
+<body>
+<div id="app">
+
+  <header id="top">
+    <div class="grp">
+      <button class="c shoulder" data-id="L2"><b>L2</b><i class="kb"></i></button>
+      <button class="c shoulder" data-id="L1"><b>L1</b><i class="kb"></i></button>
+    </div>
+    <div class="grp mid">
+      <button class="c small" data-id="ESC"><b>ESC</b><i class="kb"></i></button>
+      <button class="c small" data-id="ENTER"><b>ENTER</b><i class="kb"></i></button>
+      <button class="c small" data-id="HORN"><b>HORN</b><i class="kb"></i></button>
+      <span id="pill" class="pill">connecting…</span>
+      <button id="btn-remap" class="tool" aria-label="Change keys">KEYS</button>
+      <button id="btn-settings" class="tool" aria-label="Settings">⚙</button>
+      <button id="btn-fs" class="tool" aria-label="Fullscreen">⛶</button>
+    </div>
+    <div class="grp">
+      <button class="c shoulder" data-id="R1"><b>R1</b><i class="kb"></i></button>
+      <button class="c shoulder" data-id="R2"><b>R2</b><i class="kb"></i></button>
+    </div>
+  </header>
+
+  <main id="body">
+    <section id="left">
+      <div id="dpad">
+        <button class="c dp up"    data-id="DU"><svg viewBox="0 0 20 20"><path d="M10 4l6 9H4z"/></svg><i class="kb"></i></button>
+        <button class="c dp left"  data-id="DL"><svg viewBox="0 0 20 20"><path d="M4 10l9-6v12z"/></svg><i class="kb"></i></button>
+        <button class="c dp right" data-id="DR"><svg viewBox="0 0 20 20"><path d="M16 10l-9 6V4z"/></svg><i class="kb"></i></button>
+        <button class="c dp down"  data-id="DD"><svg viewBox="0 0 20 20"><path d="M10 16L4 7h12z"/></svg><i class="kb"></i></button>
+      </div>
+      <div id="stickzone">
+        <div id="stick">
+          <div id="knob"></div>
+          <button class="c sk up"    data-id="SU"><i class="kb"></i></button>
+          <button class="c sk down"  data-id="SD"><i class="kb"></i></button>
+          <button class="c sk left"  data-id="SL"><i class="kb"></i></button>
+          <button class="c sk right" data-id="SR"><i class="kb"></i></button>
+        </div>
+        <span class="hint">MOVE</span>
+      </div>
+    </section>
+
+    <section id="padwrap">
+      <div id="pad" class="c" data-id="TAP">
+        <span class="hint">LOOK · tap = <em id="tap1">click</em> · 2-finger tap = <em id="tap2">click</em></span>
+        <div id="dot"></div>
+        <i class="kb"></i>
+        <button class="c sub" data-id="TAP2"><i class="kb"></i></button>
+      </div>
+    </section>
+
+    <section id="right">
+      <div id="face">
+        <button class="c face tri" data-id="TRI"><svg viewBox="0 0 24 24"><polygon points="12 4 21 19 3 19"/></svg><i class="kb"></i></button>
+        <button class="c face squ" data-id="SQU"><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="1.5"/></svg><i class="kb"></i></button>
+        <button class="c face cir" data-id="CIR"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"/></svg><i class="kb"></i></button>
+        <button class="c face cro" data-id="CRO"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg><i class="kb"></i></button>
+      </div>
+      <div id="extra">
+        <button class="c small" data-id="CAM"><b>CAM</b><i class="kb"></i></button>
+        <button class="c small" data-id="RADIO"><b>RADIO</b><i class="kb"></i></button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="banner" hidden>REMAP MODE — tap any button, then pick its new key · tap <b>KEYS</b> again to finish</div>
+
+<!-- pairing -->
+<div class="overlay" id="pair" hidden>
+  <div class="card">
+    <h2>Pair with laptop</h2>
+    <p>Enter the 6-digit code shown on the laptop page.</p>
+    <input id="code" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="------" autocomplete="off">
+    <p id="pairmsg" class="msg"></p>
+    <button id="pairgo" class="primary">Connect</button>
+  </div>
+</div>
+
+<!-- key picker -->
+<div class="overlay" id="picker" hidden>
+  <div class="card wide">
+    <div class="row">
+      <h2 id="picktitle">Choose key</h2>
+      <span class="spacer"></span>
+      <button id="pickreset" class="ghost">Default</button>
+      <button id="picknone" class="ghost">None</button>
+      <button id="pickclose" class="ghost">✕</button>
+    </div>
+    <p class="msg">Tap a key below — or press a key on a connected keyboard.</p>
+    <div id="pickgrid"></div>
+  </div>
+</div>
+
+<!-- settings -->
+<div class="overlay" id="settings" hidden>
+  <div class="card">
+    <div class="row"><h2>Settings</h2><span class="spacer"></span><button id="setclose" class="ghost">✕</button></div>
+    <label>Look sensitivity <output id="o-sens"></output>
+      <input type="range" id="s-sens" min="0.4" max="6" step="0.1"></label>
+    <label>Stick size <output id="o-stick"></output>
+      <input type="range" id="s-stick" min="0.7" max="1.4" step="0.05"></label>
+    <label class="chk"><input type="checkbox" id="s-invert"> Invert look Y</label>
+    <label class="chk"><input type="checkbox" id="s-haptic"> Vibrate on press</label>
+    <label class="chk"><input type="checkbox" id="s-labels"> Show key labels on buttons</label>
+    <div class="row">
+      <button id="set-reset" class="ghost">Reset ALL keys to GTA defaults</button>
+      <button id="set-forget" class="ghost">Forget pairing code</button>
+    </div>
+  </div>
+</div>
+
+<div id="rotate" class="overlay"><div class="card"><h2>Rotate your phone</h2><p>This controller is built for landscape.</p><button id="rotatefs" class="primary">Fullscreen landscape</button></div></div>
+
+<script src="/static/mobile.js"></script>
+</body>
+</html>
