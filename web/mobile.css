@@ -38,6 +38,7 @@ body.nolabels:not(.remap) .kb{display:none}
 .pill{padding:0 1.4vh;font-size:2.1vh;color:var(--accent);white-space:nowrap}
 .pill.bad{color:var(--pink)}
 .tool{height:100%;min-width:7vh;border-radius:1.6vh;background:#10172b;border:.25vh solid var(--edge);color:var(--txt);font-size:2.3vh}
+#btn-game{min-width:11vh;padding:0 1.4vh;color:var(--amber)}
 .tool.active{background:var(--amber);color:#111;border-color:var(--amber)}
 
 /* ---- body layout ---- */
@@ -55,12 +56,12 @@ body.nolabels:not(.remap) .kb{display:none}
 #stickzone{position:relative;flex:1;width:100%;min-height:0;border-radius:2.4vh;
   background:radial-gradient(circle at 50% 60%,rgba(53,224,161,.06),transparent 70%);
   border:.25vh dashed #243050}
-#stick{position:absolute;width:calc(34vh*var(--stick));height:calc(34vh*var(--stick));border-radius:50%;
+.ring{position:absolute;width:calc(34vh*var(--stick));height:calc(34vh*var(--stick));border-radius:50%;
   left:50%;top:50%;transform:translate(-50%,-50%);
   background:radial-gradient(circle,#0a0e18 45%,#161e34 100%);border:.4vh solid #34426a;
   box-shadow:inset 0 .8vh 2vh #000a;opacity:.6;pointer-events:none}
-#stick.live{opacity:1;border-color:var(--accent)}
-#knob{position:absolute;left:50%;top:50%;width:46%;height:46%;margin:-23% 0 0 -23%;border-radius:50%;
+.ring.live{opacity:1;border-color:var(--accent)}
+.knob{position:absolute;left:50%;top:50%;width:46%;height:46%;margin:-23% 0 0 -23%;border-radius:50%;
   background:radial-gradient(circle at 35% 30%,#4a5a8c,#1b2442 70%);border:.3vh solid #5a6aa0;
   box-shadow:0 .8vh 1.6vh #000b;will-change:transform}
 .hint{position:absolute;left:0;right:0;top:.8vh;text-align:center;font-size:1.7vh;color:var(--mut);
@@ -72,20 +73,16 @@ body.nolabels:not(.remap) .kb{display:none}
 .sk.right{right:-1vh;top:50%;transform:translate(100%,-50%)}
 .sk .kb{position:static;font-size:2.4vh}
 
-/* touchpad */
+/* look joystick zone (center) */
 #padwrap{display:flex;min-height:0}
-#pad{flex:1;border-radius:2.6vh;background:linear-gradient(180deg,#0f1628,#0a0f1d);
-  border:.4vh solid #34426a;box-shadow:inset 0 0 4vh rgba(90,168,255,.08);overflow:hidden;
-  align-items:flex-start;touch-action:none}
-#pad.on{transform:none;background:linear-gradient(180deg,#112038,#0a1424);border-color:var(--blue);
-  box-shadow:inset 0 0 4vh rgba(90,168,255,.25)}
-#pad .hint{top:1.2vh}
-#pad .hint em{font-style:normal;color:var(--amber)}
-#dot{position:absolute;width:9vh;height:9vh;margin:-4.5vh 0 0 -4.5vh;border-radius:50%;left:0;top:0;
-  border:.4vh solid var(--blue);background:rgba(90,168,255,.18);opacity:0;pointer-events:none;will-change:transform}
-#pad .kb{left:1.2vh;right:auto;bottom:1vh}
-#pad .sub{display:none;position:absolute;right:1.2vh;bottom:1vh;width:12vh;height:6.5vh;border-radius:1.2vh}
-#pad .sub .kb{position:static;font-size:2.4vh}
+#lookzone{flex:1;display:block;border-radius:2.6vh;background:radial-gradient(circle at 50% 60%,rgba(90,168,255,.07),transparent 70%),#0a0f1d;
+  border:.3vh dashed #2f3f66;box-shadow:none;overflow:hidden;transition:none;touch-action:none}
+#lookzone .hint{top:1.2vh}
+#lookzone .hint em{font-style:normal;color:var(--amber)}
+#look.live{border-color:var(--blue)}
+#lookzone .kb{left:1.2vh;right:auto;bottom:1vh}
+#lookzone .sub{display:none;position:absolute;right:1.2vh;bottom:1vh;width:12vh;height:6.5vh;border-radius:1.2vh}
+#lookzone .sub .kb{position:static;font-size:2.4vh}
 
 /* face buttons */
 #face{--f:min(54vh,25vw);position:relative;width:var(--f);height:var(--f);flex:none;margin-top:.5vh}
@@ -133,11 +130,16 @@ label.chk input{width:3vh;height:3vh}
 /* remap mode */
 body.remap .c{outline:.4vh dashed var(--amber);outline-offset:.3vh}
 body.remap .sk{display:flex;pointer-events:auto}
-body.remap #pad .sub{display:flex}
-body.remap #stick{opacity:1}
-body.remap #pad .hint{opacity:.3}
+body.remap #lookzone .sub{display:flex}
+body.remap .ring{opacity:1}
+body.remap #lookzone .hint{opacity:.3}
 
 /* portrait: ask for landscape */
 @media (orientation:portrait){#rotate{display:flex}}
 /* very short screens (browser bars visible) */
 @media (max-height:300px){#app{gap:1vh}}
+
+.gamecard{display:block;width:100%;text-align:left;padding:1.8vh 2vh;margin:1vh 0;border-radius:1.6vh;background:#10172b;border:.3vh solid var(--edge);touch-action:pan-y}
+.gamecard b{display:block;font-size:2.8vh}
+.gamecard span{color:var(--mut);font-size:1.9vh;font-weight:500}
+.gamecard.cur{border-color:var(--amber)}

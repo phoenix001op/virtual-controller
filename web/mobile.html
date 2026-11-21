@@ -19,11 +19,12 @@
       <button class="c shoulder" data-id="L1"><b>L1</b><i class="kb"></i></button>
     </div>
     <div class="grp mid">
-      <button class="c small" data-id="ESC"><b>ESC</b><i class="kb"></i></button>
-      <button class="c small" data-id="ENTER"><b>ENTER</b><i class="kb"></i></button>
-      <button class="c small" data-id="HORN"><b>HORN</b><i class="kb"></i></button>
+      <button class="c small" data-id="T1"><b>ESC</b><i class="kb"></i></button>
+      <button class="c small" data-id="T2"><b>ENTER</b><i class="kb"></i></button>
+      <button class="c small" data-id="T3"><b>HORN</b><i class="kb"></i></button>
       <span id="pill" class="pill">connecting…</span>
       <button id="btn-remap" class="tool" aria-label="Change keys">KEYS</button>
+      <button id="btn-game" class="tool" aria-label="Choose game">GTA VC</button>
       <button id="btn-settings" class="tool" aria-label="Settings">⚙</button>
       <button id="btn-fs" class="tool" aria-label="Fullscreen">⛶</button>
     </div>
@@ -42,8 +43,8 @@
         <button class="c dp down"  data-id="DD"><svg viewBox="0 0 20 20"><path d="M10 16L4 7h12z"/></svg><i class="kb"></i></button>
       </div>
       <div id="stickzone">
-        <div id="stick">
-          <div id="knob"></div>
+        <div id="stick" class="ring">
+          <div id="knob" class="knob"></div>
           <button class="c sk up"    data-id="SU"><i class="kb"></i></button>
           <button class="c sk down"  data-id="SD"><i class="kb"></i></button>
           <button class="c sk left"  data-id="SL"><i class="kb"></i></button>
@@ -54,9 +55,9 @@
     </section>
 
     <section id="padwrap">
-      <div id="pad" class="c" data-id="TAP">
+      <div id="lookzone" class="c" data-id="TAP">
+        <div id="look" class="ring"><div id="lknob" class="knob"></div></div>
         <span class="hint">LOOK · tap = <em id="tap1">click</em> · 2-finger tap = <em id="tap2">click</em></span>
-        <div id="dot"></div>
         <i class="kb"></i>
         <button class="c sub" data-id="TAP2"><i class="kb"></i></button>
       </div>
@@ -70,8 +71,8 @@
         <button class="c face cro" data-id="CRO"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg><i class="kb"></i></button>
       </div>
       <div id="extra">
-        <button class="c small" data-id="CAM"><b>CAM</b><i class="kb"></i></button>
-        <button class="c small" data-id="RADIO"><b>RADIO</b><i class="kb"></i></button>
+        <button class="c small" data-id="E1"><b>CAM</b><i class="kb"></i></button>
+        <button class="c small" data-id="E2"><b>RADIO</b><i class="kb"></i></button>
       </div>
     </section>
   </main>
@@ -105,11 +106,20 @@
   </div>
 </div>
 
+<!-- game picker -->
+<div class="overlay" id="games" hidden>
+  <div class="card">
+    <div class="row"><h2>Choose game</h2><span class="spacer"></span><button id="gameclose" class="ghost">✕</button></div>
+    <p>Each game has its own button layout and its own saved key changes.</p>
+    <div id="gamelist"></div>
+  </div>
+</div>
+
 <!-- settings -->
 <div class="overlay" id="settings" hidden>
   <div class="card">
     <div class="row"><h2>Settings</h2><span class="spacer"></span><button id="setclose" class="ghost">✕</button></div>
-    <label>Look sensitivity <output id="o-sens"></output>
+    <label>Look speed <output id="o-sens"></output>
       <input type="range" id="s-sens" min="0.4" max="6" step="0.1"></label>
     <label>Stick size <output id="o-stick"></output>
       <input type="range" id="s-stick" min="0.7" max="1.4" step="0.05"></label>
