@@ -55,9 +55,8 @@ python server.py
 1. Open **http://localhost:8765/laptop** on the laptop. It shows a pairing code and the phone URL.
 2. Phone on the **same Wi-Fi**: open the phone URL, type the code. (It is remembered afterwards.)
 3. Windows Firewall asks the first time: allow **Private networks**.
-4. Open the game on the laptop, move the laptop mouse pointer **over the game window**, then
-   **tap the look area once** on the phone. That clicks the game and captures the mouse so the
-   look area can look around. `ESC` on the phone releases the mouse.
+4. Click once inside the game (or tap **R2** on the phone, the left mouse button). That captures the mouse so the look
+   joystick can turn the camera. `ESC` on the phone releases the mouse.
 5. Tap the ⛶ button on the phone for fullscreen landscape.
 
 Handy options: `python server.py --code 123456` (same code every run, no retyping),
