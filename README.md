@@ -15,7 +15,37 @@ Open `http://<laptop-ip>:8765/` on either device and the right page loads automa
 > server on the laptop receives the phone's touches over Wi-Fi and replays them as real keyboard and
 > mouse input. GitHub Pages / cloud hosting alone cannot do this.
 
-## Quick start (Windows)
+## Online mode (host it once, use from anywhere, no same-Wi-Fi needed)
+
+A website cannot press keys on your laptop, so there are three parts:
+
+1. **Relay** (`relay.py`) - you host this once. It serves the phone/laptop web pages and links the phone to your laptop.
+2. **Phone** - opens `https://<your-host>/mobile` and types the pairing code.
+3. **Agent** (`agent.py`) - a small program on the laptop that connects *out* to the relay and presses the keys.
+
+### Host the relay (free options)
+
+* **Render**: New + > Web Service > connect this GitHub repo > it detects `Dockerfile` / `render.yaml` > Create.
+  (Free instances sleep after ~15 min idle; the first load can take about a minute.)
+* **Railway / Fly.io / any VPS**: deploy the repo; start command `python relay.py` (reads `$PORT`). Docker works too.
+* GitHub Pages / Netlify static hosting alone will **not** work - the relay is a live server.
+
+### Every time you play
+
+1. On the laptop run **`start_online.bat`** (first time it asks for your relay address, e.g.
+   `https://vice-controller.onrender.com`). It prints an 8-character pairing code.
+2. On the phone open the same address (`/mobile`) and type the code, tap Connect.
+3. Optional: open the address on the laptop to see phone status, held keys and the test pad.
+4. Open the game on the laptop and click once inside it. Then play.
+
+The code is new every run (use `python agent.py --code MYCODE12` for a fixed one). Wrong codes are rate-limited
+(5 tries then a 1 minute lock). Anyone who gets your code while the agent is running can press keys on your laptop,
+so don't share it. Online mode adds the phone-to-server-to-laptop trip, so expect a bit more delay than the local
+Wi-Fi mode below; pick a host region close to you.
+
+## Local mode (same Wi-Fi, lowest delay)
+
+### Quick start (Windows)
 
 ```bat
 python -m pip install -r requirements.txt
@@ -100,6 +130,7 @@ only on a Wi-Fi you trust. The code is only shown to the laptop itself, never se
 
 ## Development / tests
 
+* `python tests/test_relay.py` - online mode test (relay + agent + phone page).
 * `python server.py --dry-run` – no real input; events are listed at `/debug/events`.
 * `tests/test_ui.py` – drives the phone page in headless Chrome (multi-touch, remap, layouts) against a
   dry-run server. Needs `pip install playwright` and Chrome. See `NOTES.md`.

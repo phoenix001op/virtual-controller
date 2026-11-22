@@ -37,7 +37,18 @@ ol{margin:0;padding-left:20px;color:var(--mut)} li{margin:6px 0} li b{color:var(
 <main>
   <h1>🌴 Vice City <span>Controller</span> — laptop receiver</h1>
 
-  <section class="card">
+  <section class="card full" id="hostedbox" hidden>
+    <h2>Online mode</h2>
+    <p style="margin:0 0 8px">1. Run <b>start_online.bat</b> (or <code>python agent.py</code>) on this laptop. It prints a pairing code.<br>
+       2. Type that code on your phone at this same website. 3. Optional: type it here to watch the status.</p>
+    <form id="hform" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <input id="hcode" maxlength="8" placeholder="CODE" autocomplete="off" style="font:700 28px ui-monospace,Menlo,Consolas,monospace;letter-spacing:6px;width:260px;padding:8px 12px;border-radius:10px;border:1px solid var(--edge);background:#0a0f1d;color:var(--accent);text-transform:uppercase">
+      <button style="padding:12px 20px;border-radius:10px;border:0;background:var(--accent);color:#06251b;font-weight:800;font-size:16px;cursor:pointer">Show status</button>
+      <span id="hmsg" class="warn"></span>
+    </form>
+  </section>
+
+  <section class="card" id="codecard">
     <h2>Pairing code</h2>
     <div class="code" id="code">······</div>
     <p style="margin:14px 0 0">On your phone (same Wi-Fi) open<br><a id="url" href="#"></a><br>and type this code.</p>
@@ -77,13 +88,25 @@ ol{margin:0;padding-left:20px;color:var(--mut)} li{margin:6px 0} li b{color:var(
 <script>
 const $ = s => document.querySelector(s);
 const heldBox = $('#held');
+let started = false;
 fetch('/status').then(r => r.json()).then(d => {
-  if (!d.code) { $('#remote').hidden = false; return; }
-  $('#code').textContent = d.code;
-  const u = `http://${d.ip}:${d.port}/mobile`;
-  $('#url').href = u; $('#url').textContent = u;
-  $('#dry').hidden = !d.dry;
+  if (d.code) {
+    $('#code').textContent = d.code;
+    const u = `http://${d.ip}:${d.port}/mobile`;
+    $('#url').href = u; $('#url').textContent = u;
+    $('#dry').hidden = !d.dry;
+    connect('');
+  } else if (d.hosted) {
+    $('#hostedbox').hidden = false; $('#codecard').hidden = true;
+    let c = ''; try { c = sessionStorage.getItem('vc.view') || ''; } catch (_) {}
+    if (c) { $('#hcode').value = c; connect(c); }
+  } else { $('#remote').hidden = false; }
 }).catch(() => {});
+$('#hform').addEventListener('submit', e => {
+  e.preventDefault();
+  const c = $('#hcode').value.trim().toUpperCase();
+  if (c.length >= 6) { try { sessionStorage.setItem('vc.view', c); } catch (_) {} $('#hmsg').textContent = ''; connect(c); }
+});
 
 function render(keys) {
   heldBox.innerHTML = '';
@@ -91,18 +114,21 @@ function render(keys) {
     const s = document.createElement('span'); s.className = 'chip' + (keys.length ? ' on' : ''); s.textContent = k; heldBox.appendChild(s);
   });
 }
-function connect() {
-  const ws = new WebSocket(`ws://${location.host}/ws?role=laptop`);
+let sock = null;
+function connect(code) {
+  if (sock) { sock.onclose = null; try { sock.close(); } catch (_) {} }
+  const ws = sock = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws?role=laptop` + (code ? `&code=${encodeURIComponent(code)}` : ''));
   ws.onmessage = e => {
     const d = JSON.parse(e.data);
+    if (d.t === 'denied') { $('#hmsg').textContent = 'Code not found. Is the laptop program running?'; ws.onclose = null; return; }
     if (d.t !== 'state') return;
+    $('#hmsg').textContent = '';
     $('#dot').className = 'dot' + (d.phone ? ' ok' : '');
     $('#phone').textContent = d.phone ? 'phone connected' : 'waiting for phone…';
     render(d.keys);
   };
-  ws.onclose = () => setTimeout(connect, 1500);
+  ws.onclose = () => setTimeout(() => { if (sock === ws) connect(code); }, 1500);
 }
-connect();
 
 // ---- test pad: shows what the browser itself receives from the injected input
 const test = $('#test'), down = new Set();

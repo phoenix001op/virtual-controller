@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: vice-controller
+    runtime: docker
+    plan: free
+    healthCheckPath: /health

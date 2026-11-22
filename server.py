@@ -278,7 +278,7 @@ async def ws_handler(req):
                 if time.time() < until:
                     await ws.send_str(json.dumps({"t": "paired", "ok": False, "wait": True}))
                     continue
-                paired = hmac.compare_digest(str(d.get("code", "")), app["code"])
+                paired = hmac.compare_digest(str(d.get("code", "")).strip().upper(), app["code"])
                 if paired:
                     app["st"]["fails"].pop(ip, None)
                     old = app["st"]["phone"]

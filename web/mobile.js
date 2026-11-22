@@ -68,7 +68,7 @@ try {
 if (!GAMES[cfg.game]) cfg.game = 'gta';
 const save = () => { try { localStorage.setItem(LS, JSON.stringify(cfg)); } catch (_) {} };
 const urlCode = new URLSearchParams(location.search).get('code');
-if (urlCode && /^\d{6}$/.test(urlCode)) cfg.code = urlCode;
+if (urlCode && /^[A-Za-z0-9]{6,8}$/.test(urlCode)) cfg.code = urlCode.toUpperCase();
 
 const game = () => GAMES[cfg.game];
 const keyOf = id => { const o = cfg.over[cfg.game] || {}; return id in o ? o[id] : game().map[id]; };
@@ -95,7 +95,7 @@ function connect() {
         clearInterval(pingT); ping(); pingT = setInterval(ping, 1000);
       } else {
         paired = false; cfg.code = ''; save();
-        showPair(d.wait ? 'Too many wrong codes — wait 30 s.' : 'Wrong code. Check the laptop page.');
+        showPair(d.wait ? 'Too many wrong tries — wait a minute.' : 'Wrong code, or the laptop program is not running.');
       }
     } else if (d.t === 'pong') {
       setPill(`● ${Math.max(0, Math.round(performance.now() - d.ts))} ms`, false);
@@ -393,12 +393,13 @@ const pairBox = $('#pair'), codeIn = $('#code');
 function showPair(msg) { pairBox.hidden = false; $('#pairmsg').textContent = msg || ''; codeIn.value = ''; }
 function hidePair() { pairBox.hidden = true; }
 function submitCode() {
-  const c = codeIn.value.replace(/\D/g, '');
-  if (c.length !== 6) { $('#pairmsg').textContent = 'Enter all 6 digits.'; return; }
+  const c = codeIn.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  if (c.length < 6) { $('#pairmsg').textContent = 'Enter the whole code.'; return; }
   pendingCode = c; raw({ t: 'pair', code: c });
 }
 $('#pairgo').onclick = submitCode;
-codeIn.addEventListener('input', () => { codeIn.value = codeIn.value.replace(/\D/g, '').slice(0, 6); if (codeIn.value.length === 6) submitCode(); });
+codeIn.addEventListener('input', () => { codeIn.value = codeIn.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 8); });
+codeIn.addEventListener('keydown', e => { if (e.key === 'Enter') submitCode(); });
 
 // ---------------------------------------------------------------- misc
 async function toggleFS() {

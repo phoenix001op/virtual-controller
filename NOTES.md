@@ -18,6 +18,13 @@
   mobile.js is the default key map; control ids are the `data-id` attributes in mobile.html.
 * `web/laptop.html` – pairing code, status, key list, test pad.
 
+## Online mode
+* `relay.py` (hosted; serves web/ + WS `/ws` for phone/laptop-viewer + `/agent` for the laptop) and `agent.py` (laptop; outbound WS to
+  the relay; reuses `Injector`/backends from server.py). Pairing code = 8 chars from `ABCDEFGHJKLMNPQRSTUVWXYZ23456789`, chosen by the agent.
+  Relay forwards phone text -> agent unchanged; agent `{"t":"state"...}` -> laptop viewers, everything else -> phone. Relay sends the agent
+  `{"t":"phone","on":bool}` and `{"t":"snap"}`. Rate limit: 5 bad codes/IP -> 60 s lock, plus a global cap. Deploy: Dockerfile / render.yaml / Procfile.
+* `tests/test_relay.py` - 16 checks. NOT yet deployed/tested on a real host or with a real phone.
+
 ## Tests (all passing when last run)
 * `tests/test_ui.py` – 92 checks vs `python server.py --dry-run --code 123456`
   (every button in both games, 8-way stick, look stick direction/speed/deadzone/stop, taps, 3-finger multitouch,
