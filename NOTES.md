@@ -12,8 +12,8 @@
   * Pairing code only returned to local requests (`is_local`); 5 wrong tries => 30 s lockout.
 * `web/mobile.{html,css,js}` – controller. Games are defined in `GAMES` (mobile.js): per-game default key map + top-bar labels;
   user remaps stored per game in `localStorage['vc.controller.v2'].over[game]`. Control ids: L1 L2 R1 R2 TRI CIR CRO SQU DU DD DL DR
-  T1 T2 T3 (top bar) E1 E2 (right bar) SU SD SL SR (left stick) TAP TAP2 (look-area taps) P1 P2 (pedals). `layout:'car'` games get body.car (wheel + pedals instead of stick + look area). Look stick = floating stick that
-  integrates mouse deltas per animation frame (speed ~ deflection^1.4, deadzone 0.12). All sizes in `vh` so it fits any landscape phone.
+  T1 T2 T3 (top bar) E1 E2 (right bar) SU SD SL SR (left stick) P1 P2 (pedals). `layout:'car'` games get body.car (wheel + pedals instead of stick + look area). Look stick = FIXED round joystick (no panel, no tap areas) that
+  integrates mouse deltas per animation frame (240 px/s at full push x cfg.look, curve ^1.6, deadzone 0.14). All sizes in `vh` so it fits any landscape phone.
   Config (key map, sensitivity...) lives in `localStorage['vc.controller.v1']`. `DEFAULTS` in
   mobile.js is the default key map; control ids are the `data-id` attributes in mobile.html.
 * `web/laptop.html` – pairing code, status, key list, test pad.

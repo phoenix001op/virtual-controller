@@ -61,13 +61,8 @@
     </section>
 
     <section id="padwrap">
-      <div id="lookzone" class="c" data-id="TAP">
-        <div id="look" class="ring"><div id="lknob" class="knob"></div></div>
-        <span class="hint">LOOK · tap = <em id="tap1">click</em> · 2-finger tap = <em id="tap2">click</em></span>
-        <i class="kb"></i>
-        <button class="c sub" data-id="TAP2"><i class="kb"></i></button>
-      </div>
-    <div id="pedals">
+      <div id="lookzone"><div id="look" class="ring"><div id="lknob" class="knob"></div></div><span class="lbl">LOOK</span></div>
+      <div id="pedals">
         <div class="prow">
           <button class="c pedal brake" data-id="P1"><b>BRAKE</b><i class="kb"></i></button>
           <button class="c pedal gas" data-id="P2"><b>GAS</b><i class="kb"></i></button>
@@ -133,7 +128,7 @@
   <div class="card">
     <div class="row"><h2>Settings</h2><span class="spacer"></span><button id="setclose" class="ghost">✕</button></div>
     <label>Look speed <output id="o-sens"></output>
-      <input type="range" id="s-sens" min="0.4" max="6" step="0.1"></label>
+      <input type="range" id="s-sens" min="0.2" max="3" step="0.1"></label>
     <label>Stick size <output id="o-stick"></output>
       <input type="range" id="s-stick" min="0.7" max="1.4" step="0.05"></label>
     <label class="chk"><input type="checkbox" id="s-invert"> Invert look Y</label>

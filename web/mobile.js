@@ -5,7 +5,7 @@ const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
 // ---------------------------------------------------------------- games
 // Control ids: L1 L2 R1 R2 | TRI CIR CRO SQU | DU DD DL DR | T1 T2 T3 (top bar) E1 E2 (right bar) | P1 P2 (pedals, car layout)
-//              SU SD SL SR (left stick dirs) | TAP TAP2 (look-zone tap / 2-finger tap)
+//              SU SD SL SR (left stick dirs) 
 // Key names come from the server (/keys). To add a game: add an entry here, nothing else.
 const GAMES = {
   gta: {
@@ -16,7 +16,7 @@ const GAMES = {
       TRI: 'F', CIR: 'SHIFT', CRO: 'SPACE', SQU: 'CTRL',
       DU: 'UP', DD: 'DOWN', DL: 'LEFT', DR: 'RIGHT',
       T1: 'ESC', T2: 'ENTER', T3: 'H', E1: 'V', E2: 'R',
-      SU: 'W', SD: 'S', SL: 'A', SR: 'D', TAP: 'MOUSE_LEFT', TAP2: 'MOUSE_RIGHT',
+      SU: 'W', SD: 'S', SL: 'A', SR: 'D',
     },
   },
   mc: {
@@ -27,7 +27,7 @@ const GAMES = {
       TRI: 'E', CIR: 'SHIFT', CRO: 'SPACE', SQU: 'CTRL',
       DU: '2', DD: '4', DL: '1', DR: '3',
       T1: 'ESC', T2: 'ENTER', T3: 'T', E1: 'F5', E2: 'Q',
-      SU: 'W', SD: 'S', SL: 'A', SR: 'D', TAP: 'MOUSE_LEFT', TAP2: 'MOUSE_RIGHT',
+      SU: 'W', SD: 'S', SL: 'A', SR: 'D',
     },
   },
 };
@@ -38,14 +38,13 @@ GAMES.car = {
   map: {
     L1: 'Q', L2: 'L', R1: 'E', R2: 'R', TRI: 'SHIFT', CIR: 'B', CRO: 'SPACE', SQU: 'H',
     DU: 'UP', DD: 'DOWN', DL: 'LEFT', DR: 'RIGHT', T1: 'ESC', T2: 'ENTER', T3: 'F', E1: 'C', E2: 'V',
-    P1: 'S', P2: 'W', RV: 'S', SL: 'A', SR: 'D', TAP: 'MOUSE_LEFT', TAP2: 'MOUSE_RIGHT',
+    P1: 'S', P2: 'W', RV: 'S', SL: 'A', SR: 'D',
   },
 };
 const TITLES = {
   L1: 'L1', L2: 'L2', R1: 'R1', R2: 'R2', TRI: '△ Triangle', CIR: '○ Circle', CRO: '✕ Cross', SQU: '□ Square',
   DU: 'D-pad up', DD: 'D-pad down', DL: 'D-pad left', DR: 'D-pad right',
   SU: 'Stick up', SD: 'Stick down', SL: 'Stick left', SR: 'Stick right',
-  TAP: 'Look-area tap', TAP2: 'Look-area 2-finger tap',
 };
 const SHORT = { SPACE: 'SPC', MOUSE_LEFT: 'LMB', MOUSE_RIGHT: 'RMB', MOUSE_MIDDLE: 'MMB', WHEEL_UP: 'WHEEL▲',
   WHEEL_DOWN: 'WHEEL▼', PAGEUP: 'PGUP', PAGEDOWN: 'PGDN', BACKSPACE: 'BKSP', UP: '↑', DOWN: '↓', LEFT: '←',
@@ -58,7 +57,7 @@ const FALLBACK_GROUPS = [['Letters', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')], ['
 
 // ---------------------------------------------------------------- saved config
 const LS = 'vc.controller.v2';
-let cfg = { game: 'gta', over: { gta: {}, mc: {}, car: {} }, sens: 2, stick: 1, invert: false, haptic: true, labels: true, code: '' };
+let cfg = { game: 'gta', over: { gta: {}, mc: {}, car: {} }, look: 1, stick: 1, invert: false, haptic: true, labels: true, code: '' };
 try {
   let s = localStorage.getItem(LS);
   if (!s) { const o = JSON.parse(localStorage.getItem('vc.controller.v1') || '{}'); delete o.map; s = JSON.stringify(o); }
@@ -178,7 +177,7 @@ function floatingStick(zone, ring, knob, { onStart, onMove, onEnd }) {
     knob.style.transform = `translate3d(${o.dx * k}px,${o.dy * k}px,0)`;
   };
   zone.addEventListener('pointerdown', e => {
-    if (remap || pid !== null || e.target.closest('.sub')) return;
+    if (remap || pid !== null || e.target.closest('.wk')) return;
     e.preventDefault(); pid = e.pointerId; zone.setPointerCapture(pid);
     const r = zone.getBoundingClientRect(); R = ring.offsetWidth / 2;
     cx = Math.min(Math.max(e.clientX - r.left, R), Math.max(R, r.width - R));
@@ -244,49 +243,42 @@ revBtn.addEventListener('pointerdown', e => {
   wheelReset = () => { pid = null; zone.classList.remove('live'); wheel.style.transform = ''; sticks.clear(); };
 })();
 
-// ---------------------------------------------------------------- look joystick (continuous mouse movement)
-const LOOK_SPEED = 500;      // mouse px per second at full deflection, per 1.0 of "Look speed"
-const LOOK_DEADZONE = 0.12;
+// ---------------------------------------------------------------- look joystick (fixed, continuous mouse movement)
+// Mouse pixels per second at full push = LOOK_SPEED * "Look speed" setting. Gentle curve so small pushes turn slowly.
+const LOOK_SPEED = 240, LOOK_DEADZONE = 0.14, LOOK_CURVE = 1.6;
 (() => {
-  const zone = $('#lookzone');
-  let vx = 0, vy = 0, on = false, raf = 0, last = 0, rx = 0, ry = 0;
-  // tap detection (a short touch with no travel = click; second finger = right click)
-  const ptr = new Map(); let t0 = 0, moved = 0, maxN = 0;
-
+  const zone = $('#lookzone'), ring = $('#look'), knob = $('#lknob');
+  let pid = null, vx = 0, vy = 0, raf = 0, last = 0, rx = 0, ry = 0;
+  function aim(e) {
+    const r = zone.getBoundingClientRect(), R = r.width / 2, lim = R * 0.62;
+    const dx = e.clientX - (r.left + R), dy = e.clientY - (r.top + R), d = Math.hypot(dx, dy) || 1;
+    const m = Math.min(1, d / lim);
+    knob.style.transform = `translate3d(${dx / d * m * lim}px,${dy / d * m * lim}px,0)`;
+    vx = dx / d * m; vy = dy / d * m;
+  }
   function loop(t) {
-    if (!on) { raf = 0; return; }
+    if (pid === null) { raf = 0; return; }
     const dt = Math.min(0.05, (t - last) / 1000); last = t;
-    const mag = Math.min(1, Math.hypot(vx, vy));
+    const mag = Math.hypot(vx, vy);
     if (mag > LOOK_DEADZONE) {
-      const k = Math.pow((mag - LOOK_DEADZONE) / (1 - LOOK_DEADZONE), 1.4) * LOOK_SPEED * cfg.sens;
+      const k = Math.pow((mag - LOOK_DEADZONE) / (1 - LOOK_DEADZONE), LOOK_CURVE) * LOOK_SPEED * cfg.look;
       rx += (vx / mag) * k * dt; ry += (vy / mag) * k * dt * (cfg.invert ? -1 : 1);
       const ix = Math.trunc(rx), iy = Math.trunc(ry); rx -= ix; ry -= iy;
       if (ix || iy) sendMove(ix, iy);
     }
     raf = requestAnimationFrame(loop);
   }
-  const reset = floatingStick(zone, $('#look'), $('#lknob'), {
-    onStart: () => { on = true; vx = vy = rx = ry = 0; last = performance.now(); if (!raf) raf = requestAnimationFrame(loop); },
-    onMove: ({ dx, dy, R }) => { vx = dx / (R * 0.8); vy = dy / (R * 0.8); },
-    onEnd: () => { on = false; vx = vy = 0; },
-  });
-  lookReset = () => { reset(); on = false; vx = vy = 0; ptr.clear(); };
-
-  // extra pointers (2nd finger) and tap bookkeeping run alongside the stick
   zone.addEventListener('pointerdown', e => {
-    if (remap || e.target.closest('.sub')) return;
-    if (!ptr.size) { t0 = performance.now(); moved = 0; maxN = 0; }
-    ptr.set(e.pointerId, { x: e.clientX, y: e.clientY }); maxN = Math.max(maxN, ptr.size);
+    if (remap || pid !== null) return;
+    e.preventDefault(); pid = e.pointerId; zone.setPointerCapture(pid);
+    ring.classList.add('live'); buzz(); rx = ry = 0; last = performance.now(); aim(e);
+    if (!raf) raf = requestAnimationFrame(loop);
   });
-  zone.addEventListener('pointermove', e => {
-    const p = ptr.get(e.pointerId); if (!p) return;
-    moved += Math.abs(e.clientX - p.x) + Math.abs(e.clientY - p.y); p.x = e.clientX; p.y = e.clientY;
-  });
-  const up = e => {
-    if (!ptr.delete(e.pointerId) || ptr.size) return;
-    if (e.type === 'pointerup' && performance.now() - t0 < 240 && moved < 10) pulse(maxN >= 2 ? 'TAP2' : 'TAP');
-  };
-  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev => zone.addEventListener(ev, up));
+  zone.addEventListener('pointermove', e => { if (e.pointerId === pid) aim(e); });
+  const reset = () => { pid = null; vx = vy = 0; ring.classList.remove('live'); knob.style.transform = ''; };
+  const end = e => { if (e.pointerId === pid) reset(); };
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev => zone.addEventListener(ev, end));
+  lookReset = reset;
 })();
 
 // ---------------------------------------------------------------- labels / remap UI
@@ -297,7 +289,6 @@ function refreshLabels() {
     const b = el.querySelector(':scope > b');
     if (b) { if (el.dataset.def === undefined) el.dataset.def = b.textContent; b.textContent = g.labels[id] ?? el.dataset.def; }
   });
-  $('#tap1').textContent = short(keyOf('TAP')); $('#tap2').textContent = short(keyOf('TAP2'));
   $('#btn-game').textContent = g.short;
   document.body.classList.toggle('car', g.layout === 'car');
   document.body.classList.toggle('nolabels', !cfg.labels);
@@ -379,14 +370,14 @@ $('#gameclose').onclick = () => { gamesBox.hidden = true; };
 // ---------------------------------------------------------------- settings
 const settings = $('#settings');
 function syncSettings() {
-  $('#s-sens').value = cfg.sens; $('#o-sens').textContent = cfg.sens.toFixed(1);
+  $('#s-sens').value = cfg.look; $('#o-sens').textContent = cfg.look.toFixed(1);
   $('#s-stick').value = cfg.stick; $('#o-stick').textContent = cfg.stick.toFixed(2);
   $('#s-invert').checked = cfg.invert; $('#s-haptic').checked = cfg.haptic; $('#s-labels').checked = cfg.labels;
   $('#set-reset').textContent = `Reset ${game().short} keys to default`;
 }
 $('#btn-settings').onclick = () => { syncSettings(); settings.hidden = false; };
 $('#setclose').onclick = () => { settings.hidden = true; };
-$('#s-sens').oninput = e => { cfg.sens = +e.target.value; $('#o-sens').textContent = cfg.sens.toFixed(1); save(); };
+$('#s-sens').oninput = e => { cfg.look = +e.target.value; $('#o-sens').textContent = cfg.look.toFixed(1); save(); };
 $('#s-stick').oninput = e => { cfg.stick = +e.target.value; $('#o-stick').textContent = cfg.stick.toFixed(2); save(); refreshLabels(); };
 $('#s-invert').onchange = e => { cfg.invert = e.target.checked; save(); };
 $('#s-haptic').onchange = e => { cfg.haptic = e.target.checked; save(); };

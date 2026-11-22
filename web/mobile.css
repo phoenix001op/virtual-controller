@@ -73,16 +73,12 @@ body.nolabels:not(.remap) .kb{display:none}
 .sk.right{right:-1vh;top:50%;transform:translate(100%,-50%)}
 .sk .kb{position:static;font-size:2.4vh}
 
-/* look joystick zone (center) */
-#padwrap{display:flex;min-height:0}
-#lookzone{flex:1;display:block;border-radius:2.6vh;background:radial-gradient(circle at 50% 60%,rgba(90,168,255,.07),transparent 70%),#0a0f1d;
-  border:.3vh dashed #2f3f66;box-shadow:none;overflow:hidden;transition:none;touch-action:none}
-#lookzone .hint{top:1.2vh}
-#lookzone .hint em{font-style:normal;color:var(--amber)}
+/* look joystick (center): a plain round joystick, no panel behind it */
+#padwrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0}
+#lookzone{position:relative;width:calc(40vh*var(--stick));max-width:100%;aspect-ratio:1;border-radius:50%;touch-action:none}
+#look{width:100%;height:100%;left:50%;top:50%;transform:translate(-50%,-50%);opacity:.9}
 #look.live{border-color:var(--blue)}
-#lookzone .kb{left:1.2vh;right:auto;bottom:1vh}
-#lookzone .sub{display:none;position:absolute;right:1.2vh;bottom:1vh;width:12vh;height:6.5vh;border-radius:1.2vh}
-#lookzone .sub .kb{position:static;font-size:2.4vh}
+#lookzone .lbl{position:absolute;left:0;right:0;bottom:-3vh;text-align:center;font-size:1.7vh;color:var(--mut);letter-spacing:.2vh;pointer-events:none}
 
 /* face buttons */
 #face{--f:min(54vh,25vw);position:relative;width:var(--f);height:var(--f);flex:none;margin-top:.5vh}
@@ -130,9 +126,7 @@ label.chk input{width:3vh;height:3vh}
 /* remap mode */
 body.remap .c{outline:.4vh dashed var(--amber);outline-offset:.3vh}
 body.remap .sk{display:flex;pointer-events:auto}
-body.remap #lookzone .sub{display:flex}
 body.remap .ring{opacity:1}
-body.remap #lookzone .hint{opacity:.3}
 
 /* portrait: ask for landscape */
 @media (orientation:portrait){#rotate{display:flex}}

@@ -68,9 +68,10 @@ Handy options: `python server.py --code 123456` (same code every run, no retypin
 Tap the game button (left of ⚙, shows `GTA VC` or `MINECRAFT`) and pick a game. Each game has its own
 button names, default keys and its own saved key changes, so remapping Minecraft never affects GTA.
 
-Two sticks: the **left stick** (bottom left) is WASD; the **center area is the look stick** — touch
-anywhere in it and drag; the further you push, the faster the mouse moves, and it stops when you let go.
-A short tap in the center area is a left click, a two-finger tap is a right click.
+Two sticks: the **left stick** (bottom left) is WASD; the **round look joystick** in the center turns the camera.
+Push it a little to turn slowly and further to turn faster; it stops when you let go. Change **Look speed** in the
+settings (default 1.0). To capture the mouse in the game, click once inside the game on the laptop, or tap **R2**
+(left mouse) on the phone.
 
 ### GTA Vice City (wasmarcade.com/vice-city)
 
@@ -117,7 +118,7 @@ To add another game, add an entry to `GAMES` at the top of `web/mobile.js`.
 * **Keys do nothing** – the game window must be focused. If the game runs as administrator, start
   the server as administrator too.
 * **Look stick doesn't turn the camera** – the laptop mouse pointer must be over the game and the game
-  must have captured the mouse (tap the look area once). Tune ⚙ Look speed. If the camera feels
+  must have captured the mouse (click inside the game once). Tune ⚙ Look speed; lower it if the camera spins too fast. If the camera feels
   uneven, turn off Windows "Enhance pointer precision".
 * **Lag** – use 5 GHz Wi-Fi or a hotspot. The green number in the top bar is the live round-trip
   time in ms.
