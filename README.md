@@ -7,7 +7,7 @@ Use your phone as a controller for GTA Vice City running on your laptop
 | Page | Where | What it does |
 |------|-------|--------------|
 | `/laptop` | laptop browser | shows the 6-digit pairing code, phone status, live key list, and a test pad |
-| `/mobile` | phone browser | the controller (landscape, tuned for a 1600×720 / 6.5" phone). Games: GTA Vice City, Minecraft |
+| `/mobile` | phone browser | the controller (landscape, tuned for a 1600×720 / 6.5" phone). Games: GTA Vice City, Minecraft, Car game |
 
 Open `http://<laptop-ip>:8765/` on either device and the right page loads automatically.
 
@@ -70,6 +70,13 @@ A short tap in the center area is a left click, a two-finger tap is a right clic
 | ✕ / ○ / □ | SPACE / SHIFT / CTRL | jump / sneak / sprint |
 | △ | E | inventory |
 | PAUSE / ENTER / CHAT / VIEW / DROP | ESC / ENTER / T / F5 / Q | pause, confirm, chat, camera view, drop |
+
+### Car game (steering layout)
+
+Left: **steering wheel** (touch and drag sideways; it turns and holds A or D). Center: big **BRAKE** (S) and
+**GAS** (W) pedals. Right: NITRO (Shift), HORN (H), LOOK BACK (B), HAND BRAKE (Space), CAMERA (C), RADIO (V).
+Top: GEAR ▼/▲ (Q/E), LIGHTS (L), RESET (R), PAUSE, ENTER, EXIT CAR (F). These keys are my best guess for a
+generic car game, so use **KEYS** to match whatever the game you play expects.
 
 To add another game, add an entry to `GAMES` at the top of `web/mobile.js`.
 

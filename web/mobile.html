@@ -42,6 +42,12 @@
         <button class="c dp right" data-id="DR"><svg viewBox="0 0 20 20"><path d="M16 10l-9 6V4z"/></svg><i class="kb"></i></button>
         <button class="c dp down"  data-id="DD"><svg viewBox="0 0 20 20"><path d="M10 16L4 7h12z"/></svg><i class="kb"></i></button>
       </div>
+      <div id="wheelzone" class="zone">
+        <div id="wheelbox"><svg id="wheel" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="none" stroke="currentColor" stroke-width="9"/><circle cx="50" cy="50" r="9" fill="currentColor"/><path d="M50 50V94M50 50L10 40M50 50L90 40" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><rect x="46" y="3" width="8" height="12" rx="2" fill="#ffc24d"/></svg></div>
+        <span class="hint">STEER · drag left / right</span>
+        <button class="c wk l" data-id="SL"><i class="kb"></i></button>
+        <button class="c wk r" data-id="SR"><i class="kb"></i></button>
+      </div>
       <div id="stickzone">
         <div id="stick" class="ring">
           <div id="knob" class="knob"></div>
@@ -61,14 +67,18 @@
         <i class="kb"></i>
         <button class="c sub" data-id="TAP2"><i class="kb"></i></button>
       </div>
+    <div id="pedals">
+        <button class="c pedal brake" data-id="P1"><b>BRAKE</b><i class="kb"></i></button>
+        <button class="c pedal gas" data-id="P2"><b>GAS</b><i class="kb"></i></button>
+      </div>
     </section>
 
     <section id="right">
       <div id="face">
-        <button class="c face tri" data-id="TRI"><svg viewBox="0 0 24 24"><polygon points="12 4 21 19 3 19"/></svg><i class="kb"></i></button>
-        <button class="c face squ" data-id="SQU"><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="1.5"/></svg><i class="kb"></i></button>
-        <button class="c face cir" data-id="CIR"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"/></svg><i class="kb"></i></button>
-        <button class="c face cro" data-id="CRO"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg><i class="kb"></i></button>
+        <button class="c face tri" data-id="TRI"><svg viewBox="0 0 24 24"><polygon points="12 4 21 19 3 19"/></svg><b class="fl"></b><i class="kb"></i></button>
+        <button class="c face squ" data-id="SQU"><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="1.5"/></svg><b class="fl"></b><i class="kb"></i></button>
+        <button class="c face cir" data-id="CIR"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"/></svg><b class="fl"></b><i class="kb"></i></button>
+        <button class="c face cro" data-id="CRO"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg><b class="fl"></b><i class="kb"></i></button>
       </div>
       <div id="extra">
         <button class="c small" data-id="E1"><b>CAM</b><i class="kb"></i></button>

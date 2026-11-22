@@ -4,7 +4,7 @@ const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
 // ---------------------------------------------------------------- games
-// Control ids: L1 L2 R1 R2 | TRI CIR CRO SQU | DU DD DL DR | T1 T2 T3 (top bar) E1 E2 (right bar)
+// Control ids: L1 L2 R1 R2 | TRI CIR CRO SQU | DU DD DL DR | T1 T2 T3 (top bar) E1 E2 (right bar) | P1 P2 (pedals, car layout)
 //              SU SD SL SR (left stick dirs) | TAP TAP2 (look-zone tap / 2-finger tap)
 // Key names come from the server (/keys). To add a game: add an entry here, nothing else.
 const GAMES = {
@@ -31,6 +31,16 @@ const GAMES = {
     },
   },
 };
+GAMES.car = {
+  name: 'Car game', short: 'CAR', layout: 'car', note: 'Steering wheel, gas, brake, handbrake, nitro…',
+  labels: { L1: 'GEAR ▼', L2: 'LIGHTS', R1: 'GEAR ▲', R2: 'RESET', TRI: 'NITRO', SQU: 'HORN', CIR: 'LOOK BACK', CRO: 'HAND BRAKE',
+            T1: 'PAUSE', T2: 'ENTER', T3: 'EXIT CAR', E1: 'CAMERA', E2: 'RADIO', P1: 'BRAKE', P2: 'GAS' },
+  map: {
+    L1: 'Q', L2: 'L', R1: 'E', R2: 'R', TRI: 'SHIFT', CIR: 'B', CRO: 'SPACE', SQU: 'H',
+    DU: 'UP', DD: 'DOWN', DL: 'LEFT', DR: 'RIGHT', T1: 'ESC', T2: 'ENTER', T3: 'F', E1: 'C', E2: 'V',
+    P1: 'S', P2: 'W', SL: 'A', SR: 'D', TAP: 'MOUSE_LEFT', TAP2: 'MOUSE_RIGHT',
+  },
+};
 const TITLES = {
   L1: 'L1', L2: 'L2', R1: 'R1', R2: 'R2', TRI: '△ Triangle', CIR: '○ Circle', CRO: '✕ Cross', SQU: '□ Square',
   DU: 'D-pad up', DD: 'D-pad down', DL: 'D-pad left', DR: 'D-pad right',
@@ -48,12 +58,12 @@ const FALLBACK_GROUPS = [['Letters', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')], ['
 
 // ---------------------------------------------------------------- saved config
 const LS = 'vc.controller.v2';
-let cfg = { game: 'gta', over: { gta: {}, mc: {} }, sens: 2, stick: 1, invert: false, haptic: true, labels: true, code: '' };
+let cfg = { game: 'gta', over: { gta: {}, mc: {}, car: {} }, sens: 2, stick: 1, invert: false, haptic: true, labels: true, code: '' };
 try {
   let s = localStorage.getItem(LS);
   if (!s) { const o = JSON.parse(localStorage.getItem('vc.controller.v1') || '{}'); delete o.map; s = JSON.stringify(o); }
   const j = JSON.parse(s || '{}');
-  cfg = { ...cfg, ...j, over: { gta: {}, mc: {}, ...(j.over || {}) } };
+  cfg = { ...cfg, ...j, over: { gta: {}, mc: {}, car: {}, ...(j.over || {}) } };
 } catch (_) {}
 if (!GAMES[cfg.game]) cfg.game = 'gta';
 const save = () => { try { localStorage.setItem(LS, JSON.stringify(cfg)); } catch (_) {} };
@@ -111,11 +121,11 @@ function sendKeys(force) {
   lastSig = sig;
   tx({ t: 'k', keys });
 }
-let stickReset = null, lookReset = null;
+let stickReset = null, lookReset = null, wheelReset = null;
 function releaseAll(notify = true) {
   active.clear(); sticks.clear();
   $$('.c.on').forEach(el => el.classList.remove('on'));
-  stickReset && stickReset(); lookReset && lookReset();
+  stickReset && stickReset(); lookReset && lookReset(); wheelReset && wheelReset();
   if (notify) { lastSig = null; sendKeys(true); }
 }
 const buzz = () => { if (cfg.haptic && navigator.vibrate) navigator.vibrate(8); };
@@ -151,7 +161,7 @@ function bindButton(el) {
   };
   ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev => el.addEventListener(ev, up));
 }
-$$('.shoulder,.small,.dp,.face').forEach(bindButton);
+$$('.shoulder,.small,.dp,.face,.pedal').forEach(bindButton);
 
 // ---------------------------------------------------------------- floating joystick helper
 // Places a ring where the finger lands and reports the finger offset (in ring radii) to callbacks.
@@ -200,6 +210,25 @@ function floatingStick(zone, ring, knob, { onStart, onMove, onEnd }) {
     onEnd: () => { sticks.clear(); sendKeys(); },
   });
   stickReset = () => { reset(); sticks.clear(); };
+})();
+
+// ---------------------------------------------------------------- steering wheel (car layout): drag sideways -> A / D
+(() => {
+  const zone = $('#wheelzone'), wheel = $('#wheel');
+  let pid = null, x0 = 0;
+  const steer = v => {
+    wheel.style.transform = `rotate(${v * 110}deg)`;
+    const want = new Set(); if (v < -0.18) want.add('SL'); else if (v > 0.18) want.add('SR');
+    if (want.size !== sticks.size || [...want].some(d => !sticks.has(d))) { sticks.clear(); want.forEach(d => sticks.add(d)); sendKeys(); }
+  };
+  zone.addEventListener('pointerdown', e => {
+    if (remap || pid !== null || e.target.closest('.wk')) return;
+    e.preventDefault(); pid = e.pointerId; zone.setPointerCapture(pid); x0 = e.clientX; zone.classList.add('live'); buzz();
+  });
+  zone.addEventListener('pointermove', e => { if (e.pointerId === pid) steer(Math.max(-1, Math.min(1, (e.clientX - x0) / (zone.clientWidth * 0.28)))); });
+  const end = e => { if (e.pointerId === pid) { wheelReset(); sticks.clear(); sendKeys(); } };
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev => zone.addEventListener(ev, end));
+  wheelReset = () => { pid = null; zone.classList.remove('live'); wheel.style.transform = ''; sticks.clear(); };
 })();
 
 // ---------------------------------------------------------------- look joystick (continuous mouse movement)
@@ -252,10 +281,12 @@ function refreshLabels() {
   const g = game();
   $$('[data-id]').forEach(el => {
     const id = el.dataset.id, k = el.querySelector(':scope > .kb'); if (k) k.textContent = short(keyOf(id));
-    if (g.labels[id]) { const b = el.querySelector(':scope > b'); if (b) b.textContent = g.labels[id]; }
+    const b = el.querySelector(':scope > b');
+    if (b) { if (el.dataset.def === undefined) el.dataset.def = b.textContent; b.textContent = g.labels[id] ?? el.dataset.def; }
   });
   $('#tap1').textContent = short(keyOf('TAP')); $('#tap2').textContent = short(keyOf('TAP2'));
   $('#btn-game').textContent = g.short;
+  document.body.classList.toggle('car', g.layout === 'car');
   document.body.classList.toggle('nolabels', !cfg.labels);
   document.documentElement.style.setProperty('--stick', cfg.stick);
 }

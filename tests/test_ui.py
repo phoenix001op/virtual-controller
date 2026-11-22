@@ -179,6 +179,45 @@ async def main():
         await touch("touchEnd", []); await page.wait_for_timeout(60); events()
         check("MC stick forward = W", downs == {"W"}, str(downs))
 
+
+        # ---- CAR game: steering wheel + pedals + other buttons
+        await page.evaluate("window.__vc.setGame('car')")
+        await page.screenshot(path=f"{OUT}/car.png")
+        check("car layout hides stick/look area", not await page.is_visible("#stickzone") and not await page.is_visible("#lookzone"))
+        check("car layout shows wheel + pedals", await page.is_visible("#wheelzone") and await page.is_visible("#pedals"))
+        car = {"P2": "W", "P1": "S", "CRO": "SPACE", "TRI": "SHIFT", "SQU": "H", "CIR": "B", "L1": "Q", "R1": "E",
+               "L2": "L", "R2": "R", "T1": "ESC", "T2": "ENTER", "T3": "F", "E1": "C", "E2": "V"}
+        await press_all(car, "CAR button")
+        wx, wy = await center("#wheelzone")
+        for name, dx, key in [("left", -70, "A"), ("right", 70, "D")]:
+            events()
+            await touch("touchStart", [{"x": wx, "y": wy, "id": 1}])
+            await touch("touchMove", [{"x": wx + dx, "y": wy, "id": 1}])
+            await page.wait_for_timeout(60)
+            downs = {e[1] for e in summary(events(clear=False)) if e[0] == "down"}
+            rot = await page.eval_on_selector("#wheel", "e=>e.style.transform")
+            await touch("touchEnd", []); await page.wait_for_timeout(60)
+            ups = {e[1] for e in summary(events()) if e[0] == "up"}
+            check(f"steer {name} => {key} held, wheel rotates, released", downs == {key} and key in ups and "rotate" in rot, f"{downs} {ups} {rot}")
+        events()
+        await touch("touchStart", [{"x": wx, "y": wy, "id": 1}])
+        await touch("touchMove", [{"x": wx + 5, "y": wy, "id": 1}]); await page.wait_for_timeout(60)
+        small = [e for e in events() if e[1] == "down"]
+        await touch("touchEnd", []); events()
+        check("tiny wheel movement = no steering (deadzone)", small == [])
+        px, py = await center('[data-id="P2"]'); sx2, sy2 = await center("#wheelzone")
+        events()
+        await touch("touchStart", [{"x": sx2, "y": sy2, "id": 1}]); await touch("touchMove", [{"x": sx2 + 70, "y": sy2, "id": 1}])
+        await touch("touchStart", [{"x": sx2 + 70, "y": sy2, "id": 1}, {"x": px, "y": py, "id": 2}])
+        await page.wait_for_timeout(80)
+        downs = {e[1] for e in summary(events(clear=False)) if e[0] == "down"}
+        check("steer right + gas at the same time (D + W)", downs == {"D", "W"}, str(downs))
+        await touch("touchEnd", []); await page.wait_for_timeout(80); events()
+        await page.evaluate("window.__vc.setGame('gta')")
+        lab = await page.inner_text('[data-id="L1"] b')
+        check("switching back to GTA restores button text", lab == "L1", lab)
+        await page.evaluate("window.__vc.setGame('mc')")
+
         # ---- remap is per game: change MC cross to X, GTA cross must stay SPACE
         await page.tap("#btn-remap")
         x, y = await center('[data-id="CRO"]')
@@ -207,6 +246,8 @@ async def main():
         for w, h in [(800, 300), (851, 393), (667, 375)]:
             pg = await ctx.new_page(); await pg.set_viewport_size({"width": w, "height": h})
             await pg.goto(BASE + "/mobile"); await pg.wait_for_selector("#pair", state="hidden")
+            await pg.evaluate("window.__vc.setGame('car')")
+            await pg.screenshot(path=f"{OUT}/layout_car_{w}x{h}.png")
             await pg.evaluate("window.__vc.setGame('mc')")
             await pg.screenshot(path=f"{OUT}/layout_{w}x{h}.png")
             bad = await pg.evaluate("""()=>{const bad=[];document.querySelectorAll('.c:not(.sk):not(.sub),.tool,.pill').forEach(e=>{
