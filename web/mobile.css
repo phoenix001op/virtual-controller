@@ -154,16 +154,21 @@ body.car .face svg{display:none}
 body.car .fl{display:block}
 .zone{position:relative;flex:1;width:100%;min-height:0;border-radius:2.4vh;border:.25vh dashed #243050;
   background:radial-gradient(circle at 50% 55%,rgba(255,194,77,.07),transparent 70%);touch-action:none}
-#wheelbox{position:absolute;left:50%;top:52%;width:min(40vh,86%);aspect-ratio:1;transform:translate(-50%,-50%);pointer-events:none}
+#wheelbox{position:absolute;left:50%;top:52%;width:min(56vh,94%);aspect-ratio:1;transform:translate(-50%,-50%);pointer-events:none}
 #wheel{width:100%;height:100%;color:#7d8bb5;will-change:transform;filter:drop-shadow(0 .8vh 1.2vh #000a)}
 #wheelzone.live #wheel{color:var(--accent)}
 .wk{display:none;position:absolute;bottom:1vh;width:12vh;height:6.5vh;border-radius:1.2vh}
 .wk.l{left:1vh}.wk.r{right:1vh}
 .wk .kb{position:static;font-size:2.4vh}
 body.remap .wk{display:flex}
-#pedals{flex:1;gap:2vh;min-height:0}
+#pedals{flex:1;flex-direction:column;justify-content:center;gap:2vh;min-height:0}
+.prow{display:flex;gap:1.6vh;height:44vh}
+.rev{height:15vh;border-radius:2.2vh}
+.rev b{font-size:2.8vh;letter-spacing:.2vh}
+.rev.on{transform:none;background:linear-gradient(180deg,#8a6a12,#4a3a08);border-color:var(--amber);box-shadow:0 0 2vh rgba(255,194,77,.5)}
+body.car #body{grid-template-columns:minmax(0,1.55fr) minmax(0,.95fr) minmax(0,1fr)}
 .pedal{flex:1;border-radius:2.6vh}
-.pedal b{font-size:3.6vh;letter-spacing:.3vh}
+.pedal b{font-size:3vh;letter-spacing:.3vh}
 .pedal .kb{font-size:2.4vh;right:1.4vh;bottom:1vh}
 .pedal.gas{background:linear-gradient(180deg,#1f6b52,#12372c);border-color:#35e0a1}
 .pedal.brake{background:linear-gradient(180deg,#7a2a3a,#3a1420);border-color:#ff5f7e}

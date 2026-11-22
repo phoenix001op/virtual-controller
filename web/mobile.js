@@ -34,11 +34,11 @@ const GAMES = {
 GAMES.car = {
   name: 'Car game', short: 'CAR', layout: 'car', note: 'Steering wheel, gas, brake, handbrake, nitro…',
   labels: { L1: 'GEAR ▼', L2: 'LIGHTS', R1: 'GEAR ▲', R2: 'RESET', TRI: 'NITRO', SQU: 'HORN', CIR: 'LOOK BACK', CRO: 'HAND BRAKE',
-            T1: 'PAUSE', T2: 'ENTER', T3: 'EXIT CAR', E1: 'CAMERA', E2: 'RADIO', P1: 'BRAKE', P2: 'GAS' },
+            T1: 'PAUSE', T2: 'ENTER', T3: 'EXIT CAR', E1: 'CAMERA', E2: 'RADIO', P1: 'BRAKE', P2: 'GAS', RV: 'REVERSE' },
   map: {
     L1: 'Q', L2: 'L', R1: 'E', R2: 'R', TRI: 'SHIFT', CIR: 'B', CRO: 'SPACE', SQU: 'H',
     DU: 'UP', DD: 'DOWN', DL: 'LEFT', DR: 'RIGHT', T1: 'ESC', T2: 'ENTER', T3: 'F', E1: 'C', E2: 'V',
-    P1: 'S', P2: 'W', SL: 'A', SR: 'D', TAP: 'MOUSE_LEFT', TAP2: 'MOUSE_RIGHT',
+    P1: 'S', P2: 'W', RV: 'S', SL: 'A', SR: 'D', TAP: 'MOUSE_LEFT', TAP2: 'MOUSE_RIGHT',
   },
 };
 const TITLES = {
@@ -110,11 +110,12 @@ function connect() {
 const ping = () => raw({ t: 'p', ts: performance.now() });
 
 // ---------------------------------------------------------------- key state
+let reverse = false;       // car layout: while on, the GAS pedal drives backwards (sends the REVERSE key)
 const active = new Set();   // control ids currently held (buttons, tap pulses)
 const sticks = new Set();   // left-stick direction ids currently held
 function sendKeys(force) {
   const set = new Set();
-  for (const id of active) { const k = keyOf(id); if (k) set.add(k); }
+  for (const id of active) { const k = keyOf(id === 'P2' && reverse ? 'RV' : id); if (k) set.add(k); }
   for (const id of sticks) { const k = keyOf(id); if (k) set.add(k); }
   const keys = [...set].sort(), sig = keys.join(',');
   if (sig === lastSig && !force) return;
@@ -212,6 +213,18 @@ function floatingStick(zone, ring, knob, { onStart, onMove, onEnd }) {
   stickReset = () => { reset(); sticks.clear(); };
 })();
 
+// reverse toggle (car layout): tap to switch GAS between forward and backward
+const revBtn = $('#revbtn');
+function updateRev() {
+  revBtn.classList.toggle('on', reverse);
+  const gas = $('[data-id="P2"]'), b = gas.querySelector(':scope > b'), k = gas.querySelector(':scope > .kb');
+  b.textContent = reverse ? 'REVERSING' : (game().labels.P2 || 'GAS'); k.textContent = short(keyOf(reverse ? 'RV' : 'P2'));
+}
+revBtn.addEventListener('pointerdown', e => {
+  if (remap) return;
+  e.preventDefault(); reverse = !reverse; buzz(); updateRev(); sendKeys();
+});
+
 // ---------------------------------------------------------------- steering wheel (car layout): drag sideways -> A / D
 (() => {
   const zone = $('#wheelzone'), wheel = $('#wheel');
@@ -289,6 +302,7 @@ function refreshLabels() {
   document.body.classList.toggle('car', g.layout === 'car');
   document.body.classList.toggle('nolabels', !cfg.labels);
   document.documentElement.style.setProperty('--stick', cfg.stick);
+  updateRev();
 }
 let groups = FALLBACK_GROUPS, pickId = null;
 fetch('/keys').then(r => r.json()).then(d => { groups = d.groups; }).catch(() => {});
@@ -346,7 +360,7 @@ remapBtn.onclick = () => {
 const gamesBox = $('#games');
 function setGame(g) {
   if (!GAMES[g]) return;
-  releaseAll(); cfg.game = g; save(); refreshLabels();
+  reverse = false; releaseAll(); cfg.game = g; save(); refreshLabels();
 }
 function openGames() {
   const list = $('#gamelist'); list.innerHTML = '';

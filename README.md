@@ -103,8 +103,8 @@ A short tap in the center area is a left click, a two-finger tap is a right clic
 
 ### Car game (steering layout)
 
-Left: **steering wheel** (touch and drag sideways; it turns and holds A or D). Center: big **BRAKE** (S) and
-**GAS** (W) pedals. Right: NITRO (Shift), HORN (H), LOOK BACK (B), HAND BRAKE (Space), CAMERA (C), RADIO (V).
+Left: big **steering wheel** (touch and drag sideways; it turns and holds A or D). Center: **BRAKE** (S) and
+**GAS** (W) pedals, and a **REVERSE** toggle: tap it and GAS drives backwards (sends the reverse key, default S; remap with KEYS). Tap again to go forward. Right: NITRO (Shift), HORN (H), LOOK BACK (B), HAND BRAKE (Space), CAMERA (C), RADIO (V).
 Top: GEAR ▼/▲ (Q/E), LIGHTS (L), RESET (R), PAUSE, ENTER, EXIT CAR (F). These keys are my best guess for a
 generic car game, so use **KEYS** to match whatever the game you play expects.
 
