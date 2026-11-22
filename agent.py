@@ -113,6 +113,11 @@ def main():
         relay = f.read_text().strip()
     if not relay:
         sys.exit("Tell me where your relay is:  python agent.py --relay https://your-app.onrender.com")
+    relay = relay.strip().strip('"').strip()
+    host = relay.split("://", 1)[-1].split("/", 1)[0]
+    if " " in relay or "." not in host:
+        sys.exit(f'The relay address looks wrong: "{relay}"\n'
+                 "Delete the file relay_url.txt and run again, or use:  python agent.py --relay https://your-app.onrender.com")
     code = (a.code or "".join(secrets.choice(ALPHABET) for _ in range(8))).upper()
 
     if a.dry_run:
